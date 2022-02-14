@@ -1,29 +1,40 @@
 package com.example.mymvp
 
-import android.icu.lang.UCharacter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.example.mymvp.databinding.ActivityMainBinding
-import com.example.mymvp.databinding.ItemGoodsBinding
+import com.example.mymvp.presenter.BasePresenter
+import com.example.mymvp.presenter.GoodsPresenter
+import com.example.mymvp.view.IBaseView
+import com.example.mymvp.view.IGoodsView
 
-class MainActivity : AppCompatActivity() {
+/**
+ * 核心思想： 相对于MVC来说，把原来的UI逻辑抽象成VIEW接口，把原来的业务逻辑抽象成PRESENTER接口，
+ * MODEL还是原来的MODEL
+ */
+class MainActivity : BaseActivity<GoodsPresenter<IGoodsView>, IGoodsView>(), IGoodsView {
 
     lateinit var binding: ActivityMainBinding
     lateinit var list: MutableList<Goods>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         list = mutableListOf()
-        getData()
-        binding.rcv.addItemDecoration(DividerItemDecoration(this,LinearLayout.VERTICAL))
+        presenter.attach(this)
+        presenter.fetch()
+    }
+
+    override fun showGoodView(good: MutableList<Goods>) {
+        binding.rcv.addItemDecoration(DividerItemDecoration(this, LinearLayout.VERTICAL))
         binding.rcv.adapter =
             object : BaseQuickAdapter<Goods, BaseViewHolder>(R.layout.item_goods, list) {
                 override fun convert(holder: BaseViewHolder, item: Goods) {
@@ -38,25 +49,19 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun getData() {
-        val goods1 = Goods(R.mipmap.ic_launcher, "1", "111")
-        val goods2 = Goods(R.mipmap.ic_launcher, "2", "222")
-        val goods3 = Goods(R.mipmap.ic_launcher, "3", "333")
-        val goods4 = Goods(R.mipmap.ic_launcher, "4", "444")
-        val goods5 = Goods(R.mipmap.ic_launcher, "5", "555")
-        val goods6 = Goods(R.mipmap.ic_launcher, "6", "666")
-        val goods7 = Goods(R.mipmap.ic_launcher, "7", "777")
-        val goods8 = Goods(R.mipmap.ic_launcher, "8", "888")
-        list.apply {
-            add(goods1)
-            add(goods2)
-            add(goods3)
-            add(goods4)
-            add(goods5)
-            add(goods6)
-            add(goods7)
-            add(goods8)
-            add(goods1)
-        }
+    override fun showLoading(msg: String) {
     }
+
+    override fun dismissLoading() {
+    }
+
+    override fun showErrorMessage(msg: String) {
+        Toast.makeText(this, "出错了", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun createPresenter(): GoodsPresenter<IGoodsView> {
+        return GoodsPresenter<IGoodsView>()
+    }
+
+
 }
