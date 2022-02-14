@@ -27,6 +27,7 @@ class MainActivity : BaseActivity<GoodsPresenter<IGoodsView>, IGoodsView>(), IGo
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        lifecycle.addObserver(presenter)
         setContentView(binding.root)
         list = mutableListOf()
         presenter.attach(this)
